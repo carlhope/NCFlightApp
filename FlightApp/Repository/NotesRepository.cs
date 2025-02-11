@@ -73,7 +73,7 @@ namespace FlightApp.Repository
                     .Include(n => n.User)
                     .Include(n => n.Votes)
                     .Include(n => n.Replies)!
-                    .ThenInclude(n => n.User)
+                    .ThenInclude(n => n.User)!
                     .Include(n => n.Replies)!
                     .ThenInclude(r => r.Votes)
                     .ToList();
@@ -106,9 +106,15 @@ namespace FlightApp.Repository
         {
             try
             {
+                var replies = db.Replies.Where(r => r.NoteId == id).ToList();
+                foreach(Reply reply in replies) 
+                { 
+                    db.Votes.RemoveRange(db.Votes.Where(v => v.ReplyId == reply.ReplyId));
+                }
+
                 db.Votes.RemoveRange(db.Votes.Where(v => v.NoteId == id));
 
-                Note note = db.Notes.Where(n => n.NoteId == id).FirstOrDefault();
+                Note note = db.Notes.Where(n => n.NoteId == id).FirstOrDefault()!;
                 db.Notes.Remove(note);
                 db.SaveChanges();
                 return note;

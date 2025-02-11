@@ -16,8 +16,11 @@ namespace FlightAppLibrary.Models.Dtos
         public string? Pronouns { get; set; }
 
         [JsonPropertyName("firstName")]
+        [Required(ErrorMessage = "First name is required")]
         public string? FirstName { get; set; }
+
         [JsonPropertyName("lastName")]
+        [Required(ErrorMessage = "Second name is required")]
         public string? LastName { get; set; }
 
         [JsonPropertyName("displayName")]

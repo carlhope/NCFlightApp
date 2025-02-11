@@ -64,7 +64,7 @@ else
                 }
             </div>
             <div class="column">
-                <ActivityPanel/>
+                <ActivityPanel OnUpdate="UpdateDashboard"/>
             </div>
         </div>
     </div>
@@ -109,7 +109,6 @@ else
                 ErrorMessage = ex.Message;
             }
         }
-        
     }
 
     public void SetUpdated()
@@ -145,4 +144,8 @@ else
         ErrorMessage = "";
     }
 
+    public async void UpdateDashboard()
+    {
+        await InvokeAsync(StateHasChanged);
+    }
 }

@@ -26,8 +26,8 @@
                         <div class="control mt-2">
                             <label for="name" class="label">Name</label>
                             <InputText id="name" class="input" @bind-Value="AppUser!.FirstName" placeholder="First Name" />
-                            <ValidationMessage class="help is-danger" For="@(() => AppUser!.FirstName)" />
                             <InputText id="name" class="input" @bind-Value="AppUser!.LastName" placeholder="Last Name" />
+                            <ValidationMessage class="help is-danger" For="@(() => AppUser!.FirstName)" />
                             <ValidationMessage class="help is-danger" For="@(() => AppUser!.LastName)" />
                         </div>
                     </div>

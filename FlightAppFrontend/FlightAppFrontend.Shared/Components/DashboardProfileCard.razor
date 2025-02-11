@@ -14,6 +14,7 @@
             <div class="media-content">
                 <p class="is-size-3 has-text-weight-bold"><strong>@($"{AppUser!.FirstName} {AppUser!.LastName}")</strong></p>
                 <p class="is-size-4">@AppUser!.DisplayName <small>@AppUser!.Pronouns</small></p>
+                <p class="is-size-4">@UserService.UserRank(AppUser!.Karma)</p>
             </div>
         </div>
     </div>

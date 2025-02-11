@@ -92,6 +92,8 @@ builder.Services.AddScoped<IRepliesRepository, RepliesRepository>();
 builder.Services.AddScoped<IRepliesService, RepliesService>();
 builder.Services.AddScoped<IVotesService, VotesService>();
 builder.Services.AddScoped<IVotesRepository, VotesRepository>();
+builder.Services.AddScoped<INotificationsService, NotificationsService>();
+builder.Services.AddScoped<INotificationsRepository, NotificationsRepository>();
 
 builder.Services.AddAutoMapper(typeof(MapperProfile).Assembly);
 builder.Services.AddScoped<IAccountService, AccountService>();

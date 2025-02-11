@@ -1,0 +1,41 @@
+@using FlightAppLibrary.Models.Dtos
+
+<EditForm FormName="EditForm" Model="Notification" OnValidSubmit="HandleValidSubmit" aria-label="Report User Form">
+    <DataAnnotationsValidator />
+
+    <div class="field">
+        <div class="control mt-2">
+            <label for="content" class="label">@Label:</label>
+            <InputTextArea id="content" rows="10" class="input" @bind-Value="Notification.Content" placeholder="Report" />
+            <ValidationMessage class="help is-danger" For="@(() => Notification!.Content)" />
+        </div>
+    </div>
+
+    <button type="submit" class="button is-warning">Submit</button>
+    <button type="button" class="button is-danger" @onclick="() => Cancel()">Cancel</button>
+</EditForm>
+
+@code{
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    [Parameter]
+    public EventCallback<string> OnSubmit { get; set; }
+
+    [Parameter]
+    public string? Label { get; set; }
+
+    public NotificationDto Notification = new();
+
+
+    protected void HandleValidSubmit()
+    {
+        OnSubmit.InvokeAsync(Notification.Content);
+    }
+
+    protected async Task Cancel()
+    {
+        await OnCancel.InvokeAsync();
+    }
+}
+

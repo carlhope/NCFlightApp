@@ -3,8 +3,11 @@
 @using FlightAppFrontend.Shared.Extensions
 @using FlightAppLibrary.Models
 @using FlightAppLibrary.Models.Dtos
+@using FlightAppLibrary.Models.Enums
 @inject IHttpClientFactory ClientFactory
 @inject TokenStateService tokenStateService
+
+<ErrorMessage Message="@ErrorMessage" OnDeleteNotification="ResetError"/>
 
 <nav class="panel is-warning">
     <p class="panel-heading has-text-centered">Activity</p>
@@ -18,6 +21,14 @@
         {
             <Loading />
         }
+        else if(Comments.Count == 0)
+        {
+            <div class="box">
+                <a class="panel-block">
+                    <p>More of a lurker, aren't we?</p>
+                </a>
+            </div>
+        }
         else
         {
             <div class="panel-block is-block">
@@ -27,7 +38,6 @@
                         <div class="level-left">
                             <button type="button" class="pagination-previous level-item" @onclick="() => pageNumber -= 1">Previous</button>
                         </div>
-                        
                     }
                     else
                     {
@@ -46,7 +56,7 @@
 
             if(Comments.Count > 0)
             {
-                for (int i = ((pageNumber - 1) * pageSize); i < (pageNumber * pageSize) - 1; i++)
+                for (int i = ((pageNumber - 1) * pageSize); i < (pageNumber * pageSize); i++)
                 {
                     <div class="box">
                         <a class="panel-block" href="@($"/FlightSummary/{Comments[i].FlightIata}")">
@@ -61,26 +71,136 @@
     }
     else if (!String.IsNullOrEmpty(NotificationsActive))
     {
-        <div class="box">
-            <button tyoe="button" class="panel-block">
-                <p>Notification</p>
-            </button>
-        </div>
+        @if (Notifications == null)
+        {
+            <Loading />
+        }
+        else if (Notifications!.Count == 0)
+        {
+            <div class="box">
+                <a class="panel-block">
+                    <p>Time to book some flights, I guess.</p>
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="panel-block is-block">
+                <nav class="pagination level" role="navigation" aria-label="pagination">
+                    @if (pageNumber != 1)
+                    {
+                        <div class="level-left">
+                            <button type="button" class="pagination-previous level-item" @onclick="() => pageNumber -= 1">Previous</button>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="level-left">
+                            <span class="level-item" />
+                        </div>
+                    }
+                    @if ((pageNumber * pageSize < Notifications.Count))
+                    {
+                        <div class="level-right">
+                            <button type="button" class="pagination-next level-item" @onclick="() => pageNumber += 1">Next</button>
+                        </div>
+                    }
+                </nav>
+            </div>
+
+            if (Notifications!.Count > 0)
+            {
+                for (int i = ((pageNumber - 1) * pageSize); i < (pageNumber * pageSize); i++)
+                {
+                    <div class="box">
+                        <div>
+                            @if(Notifications[i].NotificationType == NotificationType.Report)
+                            {
+                                <span><strong>Report: </strong>@Notifications[i].Content</span>
+                                <br />
+                                <br />
+                                <div>From User: @Notifications[i].SenderId</div>
+                                <br />
+                                <div>Against User: @Notifications[i].TargetId</div>
+                                <br />
+                                <div>@Notifications[i].TimeStamp.ToString("HH:mm dd/MM/yyyy")</div>
+                            }
+                            @if (Notifications[i].NotificationType == NotificationType.Issue)
+                            {
+                                <span><strong>Issue: </strong>@Notifications[i].Content</span>
+                                <br />
+                                <br />
+                                <div>From User: @Notifications[i].SenderId</div>
+                                <br />
+                                <div>@Notifications[i].TimeStamp.ToString("HH:mm dd/MM/yyyy")</div>
+                            }
+                            @if (Notifications[i].NotificationType == NotificationType.LevelUp || Notifications[i].NotificationType == NotificationType.VoteMilestone)
+                            {
+                                <span><strong>Congrats! </strong>@Notifications[i].Content @Notifications[i].TimeStamp.ToString("HH:mm dd/MM/yyyy")</span>
+                            }
+                        </div>
+                        <button type="button" class="button is-danger mt-3" @onclick="() => DeleteNotification(Notifications[i])">Delete</button>
+                    </div>
+
+                    if (i >= Notifications.Count - 1) break;
+                }
+            }
+        }
     }
 </nav>
 
 @code {
+    [Parameter]
+    public EventCallback OnUpdate { get; set; }
+
     private string CommentsActive = "";
     private string NotificationsActive = "";
 
     public List<DisplayComment>? Comments { get; set; }
 
+    public List<NotificationDto>? Notifications { get; set; }
+
     private int pageNumber = 1;
 
     private int pageSize = 5;
 
+    private string? ErrorMessage;
+
+    private async Task ActivateNotifications()
+    {
+        pageNumber = 1;
+        CommentsActive = "";
+        NotificationsActive = "is-active";
+
+        if (Notifications is null)
+        {
+            var reportsClient = ClientFactory.CreateClient("DirigibleApi");
+            await tokenStateService.UpdateHeaders(reportsClient);
+            var reportsResponse = await reportsClient.GetValueAsync<List<NotificationDto>>("Notifications/Reports");
+
+            Notifications = [];
+
+            if (reportsResponse.Value is List<NotificationDto> reports)
+            {
+                Notifications.AddRange(reports);
+            }
+
+            var notificationsClient = ClientFactory.CreateClient("DirigibleApi");
+            await tokenStateService.UpdateHeaders(notificationsClient);
+            var notificationsResponse = await notificationsClient.GetValueAsync<List<NotificationDto>>("Notifications");
+
+            if (notificationsResponse.Value is List<NotificationDto> notifications)
+            {
+                Notifications.AddRange(notifications);
+            }
+
+            Notifications = Notifications!.OrderBy(c => c.TimeStamp.Date).ThenByDescending(c => c.TimeStamp.TimeOfDay).ToList();
+        }
+    }
+
     private async Task ActivateComments()
     {
+        pageNumber = 1;
         NotificationsActive = "";
         CommentsActive = "is-active";
 
@@ -106,9 +226,33 @@
         }
     }
 
-    private void ActivateNotifications()
+    private async void DeleteNotification(NotificationDto notification)
     {
-        CommentsActive = "";
-        NotificationsActive = "is-active";
+        try
+        {
+            var client = ClientFactory.CreateClient("DirigibleApi");
+            await tokenStateService.UpdateHeaders(client);
+            var response = await client.DeleteAsync($"Notifications/{notification.NotificationId}");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                ErrorMessage = "Could not delete notification";
+            }
+            else
+            {
+                Notifications!.Remove(notification);
+                if (Notifications.Count % pageNumber == 0 && pageNumber != 1) pageNumber -= 1;
+                await OnUpdate.InvokeAsync();
+            }
+        }
+        catch(Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+    }
+
+    private void ResetError()
+    {
+        ErrorMessage = "";
     }
 }

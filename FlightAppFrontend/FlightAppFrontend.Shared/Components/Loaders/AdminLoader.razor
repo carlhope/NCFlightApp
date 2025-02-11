@@ -27,15 +27,16 @@ else
     <div class=" container mt-6">
         <div class="columns">
             <div class="column is-half">
-        <EditForm Model="email" OnValidSubmit="GetUser">
-            <label for="email">Email of user to edit</label>
-            <InputText id="email" @bind-Value="email">Email</InputText>
-            <button type="submit" class="button is-success">Submit</button>
-        </EditForm>
-        </div>
+                <EditForm Model="email" OnValidSubmit="GetUser" aria-label="Admin Edit User Form">
+                    <label for="email" class="label">Enter Email of User to Edit:</label>
+                    <InputText id="email" @bind-Value="email" class="input mb-3" placeholder="Email">Email</InputText>
+                    <MainButton Text="Submit"/>
+                </EditForm>
+            </div>
         </div>
     </div>
-        @if(emailEntered){
+
+    @if(emailEntered){
     <div class="container mt-6">
         @if (Login)
         {
@@ -81,7 +82,6 @@ else
                 }
             </div>
         </div>
-        
     </div>
     }
 }
@@ -100,7 +100,8 @@ else
 
     private UserDTO User { get; set; } = new UserDTO();
 
-     private string? ErrorMessage;
+    private string? ErrorMessage;
+
     [SupplyParameterFromQuery(Name = "login")]
     public bool Login { get; set; }
 
@@ -120,13 +121,11 @@ else
     public async Task GetUser(){
         try
         {
-
             var client = ClientFactory.CreateClient("DirigibleApi");
             await tokenStateService.UpdateHeaders(client);
             var response = await client.GetValueAsync<UserDTO>($"Account/GetUserDetailsByEmail?email={email}");
             User = response.Value!;
             emailEntered = true;
-
         }
         catch (Exception ex)
         {
@@ -139,15 +138,12 @@ else
         Editing = false;
     }
 
-  
-
     public void ToggleEditing()
     {
         Login = false;
         Editing = !Editing;
         if (Editing) Updated = false;
     }
-
  
     public void SetRolesUpdated()
     {

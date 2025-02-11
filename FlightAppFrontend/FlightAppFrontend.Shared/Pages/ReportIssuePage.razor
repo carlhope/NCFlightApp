@@ -1,61 +1,31 @@
+@page "/report-issue"
 @using FlightAppFrontend.Shared.Auth
 @using FlightAppFrontend.Shared.Components.Utility
 @using FlightAppFrontend.Shared.Extensions
-@using FlightAppFrontend.Shared.Services
 @using FlightAppLibrary.Models.Dtos
+@using FlightAppLibrary.Models.Enums
 @using System.Text.Json
 @using System.Text
-@using FlightAppLibrary.Models.Enums
 @inject IHttpClientFactory ClientFactory
 @inject TokenStateService TokenStateService
+@inject NavigationManager NavigationManager
 
-<SuccessMessage Message="@SuccessMessage" OnDeleteNotification="ResetSuccessMessage"/>
+<PageTitle>Report an Issue</PageTitle>
+
 <ErrorMessage Message="@ErrorMessage" OnDeleteNotification="ResetError"/>
 
-@if(CurrentUser != null)
-{
-    <div class="card mb-5 pb-4">
-        <div class="card-content">
-            <div class="media">
-                <div class="media-left">
-                    <ProfileAvatar AvatarPath="@User!.Avatar" />
-                </div>
-                <div class="media-content">
-                    <p class="is-size-3 has-text-weight-bold"><strong>@($"{User!.FirstName} {User!.LastName}")</strong></p>
-                    <p class="is-size-4">@User!.DisplayName <small>@User!.Pronouns</small></p>
-                    <p class="is-size-4">@UserService.UserRank(User!.Karma)</p>
-                </div>
-            </div>
-        </div>
-        @if (CurrentUser!.Id != User.Id)
-        {
-            <footer class="card-footer">
-                <button type="button" class="card-footer-item has-text-danger" @onclick="() => ToggleIsActive()">Report User</button>
-            </footer>
-        }
-    </div>
+<SuccessMessage Message="@SuccessMessage" OnDeleteNotification="ResetSuccessMessage"/>
 
-    <div class="modal @IsActive">
-        <div class="modal-card">
-            <section class="modal-card-body">
-                <ReportForm OnSubmit="ReportUser" OnCancel="ToggleIsActive" Label="Please Provide a Reason"/>
-            </section>
-        </div>
-        <button class="modal-close is-large" aria-label="close" @onclick="() => ToggleIsActive()"></button>
-    </div>
-}
+<div class="mt-5">
+    <ReportForm OnSubmit="SubmitReport" OnCancel="GoHome" Label="Please Provide Details" />
+</div>
 
 
 @code{
-    [Parameter]
-    public UserDTO? User { get; set; }
-
-    private UserDTO? CurrentUser;
+    private UserDTO? CurrentUser { get; set; }
 
     private string? ErrorMessage;
     private string? SuccessMessage;
-
-    private string IsActive = "";
 
     protected override async Task OnInitializedAsync()
     {
@@ -70,24 +40,22 @@
                 CurrentUser = currentUser;
             }
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             ErrorMessage = ex.Message;
         }
     }
 
-    protected async Task ReportUser(string reportContent)
+    protected async Task SubmitReport(string reportContent)
     {
-        ToggleIsActive();
-
         try
         {
-            if(CurrentUser != null)
+            if (CurrentUser != null)
             {
                 NotificationDto notificationDto = new()
                     {
-                        NotificationType = NotificationType.Report,
-                        TargetId = User!.Id!,
+                        NotificationType = NotificationType.Issue,
+                        TargetId = CurrentUser.Id!,
                         SenderId = CurrentUser.Id!,
                         Content = reportContent,
                         TimeStamp = DateTime.UtcNow,
@@ -102,7 +70,7 @@
 
                 if (response.IsSuccessStatusCode)
                 {
-                    SuccessMessage = "Submitted report successfully";
+                    SuccessMessage = "Submitted successfully";
                 }
                 else
                 {
@@ -114,15 +82,15 @@
                 ErrorMessage = "Could not validate user information";
             }
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             ErrorMessage = ex.Message;
         }
     }
 
-    protected void ToggleIsActive()
+    private void GoHome()
     {
-        IsActive = IsActive == "" ? "is-active" : "";
+        NavigationManager.NavigateTo("/");
     }
 
     private void ResetError()

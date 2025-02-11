@@ -33,27 +33,31 @@ namespace FlightAppFrontend.Shared.Services
 
         public static string UserRank(int karma)
         {
-            if(karma > 10)
+            if(karma < 0)
+            {
+                return "Grounded";
+            }
+            else if(karma < 10)
             {
                 return "Cleared for Takeoff";
             }
-            else if(karma > 20)
+            else if(karma < 20)
             {
                 return "Frequent Flyer";
             }
-            else if(karma > 30)
+            else if(karma < 30)
             {
                 return "Aero Enthusiast";
             }
-            else if(karma > 40)
+            else if(karma < 40)
             {
                 return "Jet Setter";
             }
-            else if(karma > 50)
+            else if(karma < 50)
             {
                 return "Top Gun";
             }
-            else if(karma > 60)
+            else if(karma < 60)
             {
                 return "Cloud Rider";
             }

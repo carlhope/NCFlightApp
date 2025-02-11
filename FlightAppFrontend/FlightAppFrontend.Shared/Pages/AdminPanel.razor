@@ -1,5 +1,6 @@
 ﻿@page "/Admin"
 @using FlightAppFrontend.Shared.Components.Loaders
+@using FlightAppFrontend.Shared.Components.Utility
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
 
@@ -9,6 +10,6 @@
         <AdminLoader />
     </Authorized>
     <NotAuthorized>
-        <p>You are not authorized to view this page.</p>
+        <RedirectHome/>
     </NotAuthorized>
 </AuthorizeView> 

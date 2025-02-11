@@ -13,6 +13,7 @@ namespace FlightApp.Database
         public DbSet<Note> Notes { get; set; }
         public DbSet<Reply> Replies { get; set; }
         public DbSet<Vote> Votes { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
         public FlightAppDbContext(DbContextOptions<FlightAppDbContext> options) : base(options) { }
 
