@@ -33,23 +33,25 @@
 
     private async Task HandleValidSubmit()
     {
-        var client = ClientFactory.CreateClient("DirigibleApi");
-        await tokenStateService.UpdateHeaders(client);
-        ReplyDto.ReplyText = CommentText.Text;
-        ReplyDto.UserId = CurrentUser!.Id!;
-        ReplyDto.NoteId = Note.NoteId;
-        ReplyDto.TimeStamp = DateTime.UtcNow;
-        ReplyDto.User = CurrentUser;
-
-        var json = JsonSerializer.Serialize(ReplyDto);
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
-        var response = await client.PostAsync("replies", content);
-
-        if (response.IsSuccessStatusCode)
+        using (var client = ClientFactory.CreateClient("DirigibleApi"))
         {
-            ReplyDto = await response.Content.ReadFromJsonAsync<ReplyDto>();
-            await OnReplyAdded.InvokeAsync(ReplyDto);
-            ReplyDto = new ReplyDto();
+            await tokenStateService.UpdateHeaders(client);
+            ReplyDto.ReplyText = CommentText.Text;
+            ReplyDto.UserId = CurrentUser!.Id!;
+            ReplyDto.NoteId = Note.NoteId;
+            ReplyDto.TimeStamp = DateTime.UtcNow;
+            ReplyDto.User = CurrentUser;
+
+            var json = JsonSerializer.Serialize(ReplyDto);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            var response = await client.PostAsync("replies", content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                ReplyDto = await response.Content.ReadFromJsonAsync<ReplyDto>();
+                await OnReplyAdded.InvokeAsync(ReplyDto);
+                ReplyDto = new ReplyDto();
+            }
         }
     }
 }

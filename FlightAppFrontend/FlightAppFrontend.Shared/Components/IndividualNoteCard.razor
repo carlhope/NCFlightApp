@@ -17,7 +17,7 @@
                 </a>
             </figure>
         </div>
-        
+
         <div class="card-header-title is-size-6 is-flex is-flex-direction-column is-align-items-flex-start">
             <span class="has-text-weight-bold">@Note.User!.DisplayName</span>
             <span class="is-size-7 has-text-weight-normal">@Note.TimeStamp.ToString()</span>
@@ -46,7 +46,7 @@
             </div>
         </div>
     </header>
-    
+
     @if (isCardOpen)
     {
         @foreach (var reply in Note.Replies!)
@@ -91,7 +91,10 @@
 
     public void HandleReplyAdded(ReplyDto ReplyDto)
     {
-        if (ReplyDto.User.DisplayName == null) ReplyDto.User.DisplayName = ReplyDto.User.FirstName;
+        if (ReplyDto.User.DisplayName == null)
+        {
+            ReplyDto.User.DisplayName = ReplyDto.User.FirstName;
+        }
         Note.Replies!.Add(ReplyDto);
     }
 

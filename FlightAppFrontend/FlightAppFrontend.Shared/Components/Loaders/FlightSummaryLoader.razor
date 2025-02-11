@@ -34,13 +34,13 @@ else
     {
         try
         {
-            var client = ClientFactory.CreateClient("DirigibleApi");
-            var response = await client.GetValueAsync<FlightResponse>($"FlightApi/{IATA}");
-            FlightResponse = response.Value;
-            ErrorMessage = response.ErrorMessage;
+            // var client = ClientFactory.CreateClient("DirigibleApi");
+            // var response = await client.GetValueAsync<FlightResponse>($"FlightApi/{IATA}");
+            // FlightResponse = response.Value;
+            // ErrorMessage = response.ErrorMessage;
 
-            // var response = JsonSerializer.Deserialize<FlightResponseWrapper>(File.ReadAllText("..\\..\\FlightApp\\test_flight_json.json")).Data;
-            // FlightResponse = response[0];
+            var response = JsonSerializer.Deserialize<FlightResponseWrapper>(File.ReadAllText("..\\..\\FlightApp\\test_flight_json.json")).Data;
+            FlightResponse = response[0];
         }
         catch(Exception ex)
         {
