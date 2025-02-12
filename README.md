@@ -25,3 +25,5 @@ Login and registration forms are validated on the frontend to ensure emails and 
 * More admin abilities such as banning
 * Homepage Carousel
 * Backend Logging
+* Livechat
+* Passenger Verfication
